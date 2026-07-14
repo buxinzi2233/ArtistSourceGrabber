@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c0d10">
+<title>Artist Source Grabber</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="config-rail" aria-label="下载配置">
+    <header class="brand-header">
+      <div class="brand-copy"><h1>Artist Source Grabber</h1><p>多来源画师作品采集与标注</p></div>
+    </header>
+
+    <div class="config-scroll">
+      <details class="config-section" open>
+        <summary><span class="step-number">01</span><span>数据来源</span><small>选择与登录</small></summary>
+        <div class="section-body">
+          <label>混合来源（可多选）</label>
+          <div id="sourceChecklist" class="source-checklist" aria-label="选择下载来源"></div>
+          <p class="hint">来源按列表顺序执行并保存到同一画师目录，单个来源失败不会中断其他来源。</p>
+          <label>当前编辑来源<select id="source"></select></label>
+          <p id="sourceDescription" class="hint"></p>
+          <div id="sourceWarning" class="warning-box hidden"></div>
+
+          <div id="xSessionPanel" class="sub-panel session-panel hidden">
+            <div class="session-heading"><span>X 登录</span><span class="session-status">持久会话</span></div>
+            <label>X 登录方式<select id="xCookieMode"><option value="managed">专用 X 登录窗口（推荐）</option><option value="legacy">现有 Cookie / 浏览器读取（兼容）</option></select></label>
+            <p class="hint">仅首次登录或切换账号时显示窗口。Cookie 不返回网页，也不写入 localStorage。</p>
+            <div class="test-row"><button id="openXSessionBtn" class="secondary-btn" type="button">打开登录 / 切换账号</button><button id="checkXSessionBtn" class="secondary-btn" type="button">检查登录</button></div>
+            <div id="xSessionResult" class="test-result" aria-live="polite"></div>
+            <p id="xLegacyHint" class="hint hidden">兼容模式可使用 auth_token、cookies.txt 或浏览器 Cookie；读取日常浏览器时可能需要先关闭浏览器。</p>
+          </div>
+
+          <div id="pixivSessionPanel" class="sub-panel session-panel hidden">
+            <div class="session-heading"><span>Pixiv 登录</span><span class="session-status">持久会话</span></div>
+            <label>Pixiv 登录方式<select id="pixivCookieMode"><option value="managed">专用 Pixiv 登录窗口（推荐）</option><option value="legacy">现有 access_token / PHPSESSID（兼容）</option></select></label>
+            <p class="hint">仅首次登录或切换账号时显示窗口。凭据不返回网页，也不写入 localStorage。</p>
+            <div class="test-row"><button id="openPixivSessionBtn" class="secondary-btn" type="button">打开登录 / 切换账号</button><button id="checkPixivSessionBtn" class="secondary-btn" type="button">检查登录</button></div>
+            <div id="pixivSessionResult" class="test-result" aria-live="polite"></div>
+          </div>
+
+          <div id="extraFields"></div><div id="authFields"></div>
+          <details id="xLegacySettings" class="sub-panel legacy-settings hidden"><summary>兼容模式设置</summary><p class="hint">仅在专用 X 窗口不可用时使用 auth_token、ct0、cookies.txt 或读取现有浏览器 Profile。</p><div id="xLegacyAuthFields"></div><div id="xLegacyExtraFields"></div></details>
+          <details id="pixivLegacySettings" class="sub-panel legacy-settings hidden"><summary>兼容模式设置</summary><p class="hint">仅在专用 Pixiv 窗口不可用时手动填写 access_token 或 PHPSESSID。</p><div id="pixivLegacyAuthFields"></div></details>
+          <div id="xOpenRow" class="test-row hidden"><button id="openXBtn" class="secondary-btn" type="button">打开 X 画师页</button><span id="xOpenResult" class="test-result"></span></div>
+          <div class="test-row source-test-row"><button id="testSourceBtn" class="secondary-btn" type="button">测试来源连接</button><span id="sourceTestResult" class="test-result"></span></div>
+        </div>
+      </details>
+
+      <details class="config-section" open>
+        <summary><span class="step-number">02</span><span>确认同一画师</span><small>模糊匹配</small></summary>
+        <div class="section-body">
+          <label>Danbooru 画师名 / 别名 / 主页 URL<span class="search-row"><input id="artistQuery" type="text" placeholder="如 kantoku、Askzy 或 https://x.com/..." autocomplete="off"><button id="searchArtistBtn" class="secondary-btn" type="button">搜索</button></span></label>
+          <p class="hint">优先用 Danbooru 画师记录确认同名身份，再自动带出 X、Pixiv 等关联主页。</p>
+          <div id="artistCandidates" class="candidate-list hidden"></div>
+          <div id="selectedArtist" class="selected-artist hidden"></div>
+          <label>目标画师 / 来源内账号<input id="sourceArtist" type="text" placeholder="选择候选后自动填写，也可手动输入" autocomplete="off"></label>
+          <p id="sourceArtistHint" class="hint hidden">这里填写要抓取的 X 画师账号；浏览器 Cookie 可以来自你自己的任意已登录 X 账号。</p>
+          <input id="canonicalArtist" type="hidden"><input id="canonicalArtistId" type="hidden"><input id="xUserId" type="hidden">
+        </div>
+      </details>
+
+      <details class="config-section" open>
+        <summary><span class="step-number">03</span><span>下载与标注</span><small>输出设置</small></summary>
+        <div class="section-body">
+          <label>单次下载数量<span class="count-row"><input id="count" type="number" min="0" step="1" value="50"><span class="hint-inline">0 = 直到来源结束</span></span></label>
+          <label>内容分级<select id="rating"></select></label>
+          <label>额外打标器<select id="taggerType"><option value="none">仅使用来源标签</option><option value="openai">OpenAI-compatible 视觉 LLM</option><option value="onnx">本地 WD14 ONNX</option></select></label>
+          <label>标签合并方式<select id="tagMergeMode"><option value="tagger_only">仅使用打标器标签（推荐）</option><option value="native_plus_tagger">来源标签 + 打标器标签</option><option value="native_only">仅使用来源标签</option></select></label>
+
+          <div id="llmFields" class="sub-panel hidden"><label>Base URL<input id="llmBaseUrl" type="text" value="https://api.openai.com/v1" placeholder="http://127.0.0.1:11434/v1"></label><label>API Key<input id="llmApiKey" type="password" autocomplete="off" placeholder="本地无鉴权服务可留空"></label><label>视觉模型<input id="llmModel" type="text" placeholder="支持图片输入的模型名"></label><label>提示词预设<select id="llmPromptPreset"><option value="general">Danbooru / WD14 通用（推荐）</option><option value="character">人物与服饰重点</option><option value="composition">场景与构图重点</option><option value="custom">自定义</option></select></label><label>提示词（可编辑）<textarea id="llmPrompt" rows="6" placeholder="选择预设后自动填入，也可直接编辑"></textarea></label><p class="hint">程序会强制附加 JSON tags schema；远程端点会收到图片内容，有隐私要求时请使用本地兼容服务。</p></div>
+          <div id="onnxFields" class="sub-panel hidden"><label>ONNX 模型路径<input id="onnxModelPath" type="text" placeholder="D:\models\model.onnx"></label><label>selected_tags.csv 路径<input id="onnxTagsPath" type="text" placeholder="D:\models\selected_tags.csv"></label><label>标签阈值<input id="onnxThreshold" type="number" min="0" max="1" step="0.01" value="0.35"></label><p class="hint">需要可选依赖：onnxruntime、Pillow、numpy。</p></div>
+          <div class="test-row"><button id="testTaggerBtn" class="secondary-btn" type="button">测试打标器</button><span id="taggerTestResult" class="test-result"></span></div>
+          <div class="radio-row"><label class="choice"><input type="radio" name="tagFormat" value="comma" checked><span>训练格式<small>逗号分隔</small></span></label><label class="choice"><input type="radio" name="tagFormat" value="space"><span>原始格式<small>空格分隔</small></span></label></div>
+          <label class="check"><input type="checkbox" id="includeArtist" checked><span>标签中包含已确认的 Danbooru 画师名</span></label>
+          <label class="check"><input type="checkbox" id="includeMeta"><span>包含来源 meta 标签</span></label>
+          <label class="check"><input type="checkbox" id="skipVideo" checked><span>跳过视频 / 动图</span></label>
+        </div>
+      </details>
+
+      <details class="config-section">
+        <summary><span class="step-number">04</span><span>网络与安全</span><small>可选</small></summary>
+        <div class="section-body"><label>代理<input id="proxy" type="text" placeholder="http://127.0.0.1:7890" autocomplete="off"></label><p class="hint">密码、Cookie 与 LLM Key 不写入 localStorage，仅在当前页面和本机进程内使用。</p></div>
+      </details>
+    </div>
+
+    <div class="rail-actions"><button id="startBtn" class="primary-btn" type="button"><span aria-hidden="true">▶</span> 开始下载</button><button id="stopBtn" class="danger-btn" type="button" disabled>停止</button><button id="shutdownBtn" class="icon-btn" type="button" aria-label="关闭程序" title="关闭程序">⏻</button></div>
+    <div id="shutdownResult" class="shutdown-result hidden" role="status"></div>
+  </aside>
+
+  <main class="workspace">
+    <header class="workspace-header"><div><h2>作品工作区</h2><p id="workspaceSubtitle">选择画师与来源，开始建立可检索的训练素材集</p></div><div class="task-state"><span id="statusPill" class="pill idle">空闲</span><span id="identityLine" class="identity-line hidden"></span></div></header>
+    <div id="errorBox" class="error-box hidden"></div>
+
+    <section class="task-overview" aria-label="任务进度">
+      <div class="progress-area"><div class="progress-row"><div class="progress-bar"><div id="progressFill" style="width:0%"></div></div><div id="progressText" class="progress-text">0 / 0</div></div><div id="folderLine" class="folder-line hidden"></div></div>
+      <div class="stats"><div class="stat"><span id="statTotal">–</span><label>来源作品</label></div><div class="stat"><span id="statDone">0</span><label>已下载</label></div><div class="stat"><span id="statSkipped">0</span><label>已跳过</label></div><div class="stat stat-fail"><span id="statFailed">0</span><label>失败</label></div></div>
+    </section>
+    <div id="sourceStates" class="source-states hidden"></div>
+
+    <section class="gallery-section">
+      <header class="gallery-header"><div><h2>已下载作品</h2><p>保持真实宽高比显示，点击图片查看原图，打开“标签”查看单图打标详情</p></div><span id="galleryCount" class="gallery-count">0 张</span></header>
+      <div id="gallery" class="gallery"><div class="gallery-empty" id="galleryEmpty"><div class="empty-mark">AS</div><strong>作品会出现在这里</strong><span>选择并确认画师后开始任务</span></div></div>
+    </section>
+
+    <details class="log-panel"><summary><span>运行日志</span><small>查看来源连接、下载与打标过程</small></summary><div id="logBox" class="log-box"></div></details>
+    <footer>仅启用明确列出的来源 · 请遵守各站条款与作品版权</footer>
+  </main>
+</div>
+
+<dialog id="lightbox" class="lightbox">
+  <div class="lightbox-shell"><div id="lightboxMedia" class="lightbox-media"></div><div class="lightbox-toolbar"><div><strong id="lightboxTitle">原图预览</strong><span id="lightboxMeta"></span></div><div class="overlay-actions"><button id="lightboxPrev" class="overlay-btn" type="button" aria-label="上一张">←</button><button id="lightboxNext" class="overlay-btn" type="button" aria-label="下一张">→</button><a id="lightboxOpen" class="overlay-btn" target="_blank" rel="noopener">打开原文件</a><button id="lightboxClose" class="overlay-btn" type="button">关闭</button></div></div></div>
+</dialog>
+
+<dialog id="tagDrawer" class="tag-drawer">
+  <header class="drawer-header"><div><strong id="tagDrawerTitle">打标详情</strong><span id="tagDrawerMeta"></span></div><button id="tagDrawerClose" class="overlay-btn" type="button" aria-label="关闭打标详情">×</button></header>
+  <div id="tagDrawerBody" class="drawer-body"></div>
+  <footer class="drawer-footer"><button id="copyTagsBtn" class="primary-btn" type="button">复制最终标签</button></footer>
+</dialog>
+
+<script src="/static/dropdown.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

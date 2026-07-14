@@ -1,0 +1,37 @@
+# Runtime data and user downloads
+downloads/
+.venv/
+dist/
+_release_build/
+_verify_release/
+
+# Python caches and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Credentials, browser data and local configuration
+.env
+.env.*
+*.cookies.txt
+cookies.txt
+*BrowserProfile/
+*BrowserSession.json
+
+# Local models can be large and may have separate licenses
+*.onnx
+selected_tags.csv
+
+# Release archives are uploaded as GitHub Release assets, not committed
+*.zip
+
+# Local screenshots; the optimized docs image is committed explicitly
+屏幕截图*.png
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
