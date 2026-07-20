@@ -98,8 +98,7 @@ function renderSource(clearMapping=true){
 function renderTagger(){els.llmFields.classList.toggle("hidden",els.taggerType.value!=="openai");els.onnxFields.classList.toggle("hidden",els.taggerType.value!=="onnx");saveSettings();}
 function renderQueryType(){
   const mode=els.queryType.value, isArtist=mode==="artist";
-  els.queryTypeHint.textContent=isArtist?"以 Danbooru 画师记录确认同名身份，自动带出 X、Pixiv 等关联主页。":"直接输入角色名或标签搜索 booru 站点；X/Pixiv 不支持此模式。";
-  els.searchArtistBtn.disabled=!isArtist;
+  els.queryTypeHint.textContent=isArtist?"以 Danbooru 画师记录确认同名身份，自动带出 X、Pixiv 等关联主页。":"直接输入角色名或标签，点搜索可校验 Danbooru 中是否存在；X/Pixiv 不支持此模式。";
   els.artistQuery.placeholder=isArtist?"如 kantoku、Askzy 或 https://x.com/...":"如 hatsune_miku、touhou 或 1girl";
   if(!isArtist){els.artistCandidates.classList.add("hidden");}
   const userSources=["twitter","pixiv"];
