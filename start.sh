@@ -21,4 +21,9 @@ fi
 echo "正在启动 Multi-source Artist Grabber ..."
 echo "关闭本终端即可退出服务。"
 echo ""
+
+# Load CUDA libraries for onnxruntime-gpu (from MonadForge venv)
+NVIDIA_LIBS=$(find /home/buxinzi/Projects/toolbox/model-train/MonadForge/.venv/lib/python*/site-packages/nvidia -name "lib" -type d 2>/dev/null | tr '\n' ':')
+export LD_LIBRARY_PATH="${NVIDIA_LIBS}${LD_LIBRARY_PATH}"
+
 "$PY" app.py --no-browser
