@@ -1,7 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const els = {};
-for (const id of ["source","sourceChecklist","sourceDescription","sourceWarning","authFields","extraFields","xLegacySettings","xLegacyAuthFields","xLegacyExtraFields","pixivLegacySettings","pixivLegacyAuthFields","xSessionPanel","xCookieMode","openXSessionBtn","checkXSessionBtn","xSessionResult","xLegacyHint","pixivSessionPanel","pixivCookieMode","openPixivSessionBtn","checkPixivSessionBtn","pixivSessionResult","xOpenRow","openXBtn","xOpenResult","testSourceBtn","sourceTestResult","artistQuery","searchArtistBtn","artistCandidates","selectedArtist","sourceArtist","sourceArtistHint","canonicalArtist","canonicalArtistId","xUserId","count","rating","taggerType","tagMergeMode","llmFields","llmBaseUrl","llmApiKey","llmModel","llmPromptPreset","llmPrompt","onnxFields","onnxModelPath","onnxTagsPath","onnxThreshold","testTaggerBtn","taggerTestResult","includeArtist","includeMeta","skipVideo","proxy","startBtn","stopBtn","shutdownBtn","shutdownResult","statusPill","errorBox","identityLine","sourceStates","progressFill","progressText","statTotal","statDone","statSkipped","statFailed","folderLine","workspaceSubtitle","gallery","galleryCount","logBox","lightbox","lightboxMedia","lightboxTitle","lightboxMeta","lightboxOpen","lightboxPrev","lightboxNext","lightboxClose","tagDrawer","tagDrawerTitle","tagDrawerMeta","tagDrawerBody","tagDrawerClose","copyTagsBtn"]) els[id] = $(id);
+for (const id of ["source","sourceChecklist","sourceDescription","sourceWarning","authFields","extraFields","xLegacySettings","xLegacyAuthFields","xLegacyExtraFields","pixivLegacySettings","pixivLegacyAuthFields","xSessionPanel","xCookieMode","openXSessionBtn","checkXSessionBtn","xSessionResult","xLegacyHint","pixivSessionPanel","pixivCookieMode","openPixivSessionBtn","checkPixivSessionBtn","pixivSessionResult","xOpenRow","openXBtn","xOpenResult","testSourceBtn","sourceTestResult","artistQuery","searchArtistBtn","artistCandidates","selectedArtist","sourceArtist","sourceArtistHint","canonicalArtist","canonicalArtistId","xUserId","count","rating","taggerType","tagMergeMode","llmFields","llmBaseUrl","llmApiKey","llmModel","llmPromptPreset","llmPrompt","onnxFields","onnxModelPath","onnxTagsPath","onnxThreshold","testTaggerBtn","taggerTestResult","includeArtist","includeMeta","skipVideo","proxy","startBtn","stopBtn","shutdownBtn","shutdownResult","statusPill","errorBox","identityLine","sourceStates","progressFill","progressText","statTotal","statDone","statSkipped","statFailed","folderLine","workspaceSubtitle","gallery","galleryCount","logBox","lightbox","lightboxMedia","lightboxTitle","lightboxMeta","lightboxOpen","lightboxPrev","lightboxNext","lightboxClose","tagDrawer","tagDrawerTitle","tagDrawerMeta","tagDrawerBody","tagDrawerClose","copyTagsBtn","queryType","queryTypeHint"]) els[id] = $(id);
 
 const STORE_KEY = "artist_grabber_settings_v2";
 const STATUS_TEXT = {idle:"空闲",pending:"等待中",testing:"连接测试中",preparing:"准备中…",running:"下载中",done:"已完成",skipped:"已跳过",stopped:"已停止",error:"出错"};
@@ -24,7 +24,7 @@ function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 
 function saveSettings(){
   const mappings={};document.querySelectorAll("[data-source-map]").forEach(e=>mappings[e.dataset.sourceMap]=e.value.trim());
-  const data={source:els.source.value,selectedSources:sources.filter(s=>selectedSourceIds.has(s.id)).map(s=>s.id),sourceMappings:mappings,xCookieMode:els.xCookieMode.value,pixivCookieMode:els.pixivCookieMode.value,artistQuery:els.artistQuery.value,sourceArtist:els.sourceArtist.value,canonicalArtist:els.canonicalArtist.value,canonicalArtistId:els.canonicalArtistId.value,xUserId:els.xUserId.value,count:els.count.value,proxy:els.proxy.value,taggerType:els.taggerType.value,tagMergeMode:els.tagMergeMode.value,llmBaseUrl:els.llmBaseUrl.value,llmModel:els.llmModel.value,llmPromptPreset:els.llmPromptPreset.value,llmPrompt:els.llmPrompt.value,onnxModelPath:els.onnxModelPath.value,onnxTagsPath:els.onnxTagsPath.value,onnxThreshold:els.onnxThreshold.value,tagFormat:getTagFormat(),includeArtist:els.includeArtist.checked,includeMeta:els.includeMeta.checked,skipVideo:els.skipVideo.checked};
+  const data={source:els.source.value,queryType:els.queryType.value,selectedSources:sources.filter(s=>selectedSourceIds.has(s.id)).map(s=>s.id),sourceMappings:mappings,xCookieMode:els.xCookieMode.value,pixivCookieMode:els.pixivCookieMode.value,artistQuery:els.artistQuery.value,sourceArtist:els.sourceArtist.value,canonicalArtist:els.canonicalArtist.value,canonicalArtistId:els.canonicalArtistId.value,xUserId:els.xUserId.value,count:els.count.value,proxy:els.proxy.value,taggerType:els.taggerType.value,tagMergeMode:els.tagMergeMode.value,llmBaseUrl:els.llmBaseUrl.value,llmModel:els.llmModel.value,llmPromptPreset:els.llmPromptPreset.value,llmPrompt:els.llmPrompt.value,onnxModelPath:els.onnxModelPath.value,onnxTagsPath:els.onnxTagsPath.value,onnxThreshold:els.onnxThreshold.value,tagFormat:getTagFormat(),includeArtist:els.includeArtist.checked,includeMeta:els.includeMeta.checked,skipVideo:els.skipVideo.checked};
   try{localStorage.setItem(STORE_KEY,JSON.stringify(data));}catch(_e){}
 }
 function loadSettings(){let d={};try{d=JSON.parse(localStorage.getItem(STORE_KEY)||"{}");}catch(_e){};return d;}
@@ -42,6 +42,7 @@ async function loadSources(){
 }
 function applySaved(d){
   for(const [key,id] of [["artistQuery","artistQuery"],["sourceArtist","sourceArtist"],["count","count"],["proxy","proxy"],["taggerType","taggerType"],["tagMergeMode","tagMergeMode"],["llmBaseUrl","llmBaseUrl"],["llmModel","llmModel"],["llmPromptPreset","llmPromptPreset"],["llmPrompt","llmPrompt"],["onnxModelPath","onnxModelPath"],["onnxTagsPath","onnxTagsPath"],["onnxThreshold","onnxThreshold"]]) if(d[key]!==undefined) els[id].value=d[key];
+  if(d.queryType)els.queryType.value=d.queryType;renderQueryType();
   if(d.tagMergeMode===undefined) els.tagMergeMode.value=els.taggerType.value==="none"?"native_only":"tagger_only";
   if(!els.llmPrompt.value.trim()){els.llmPromptPreset.value="general";els.llmPrompt.value=LLM_PROMPT_PRESETS.general;}
   else if(LLM_PROMPT_PRESETS[els.llmPromptPreset.value]!==els.llmPrompt.value)els.llmPromptPreset.value="custom";
@@ -95,6 +96,22 @@ function renderSource(clearMapping=true){
   saveSettings();
 }
 function renderTagger(){els.llmFields.classList.toggle("hidden",els.taggerType.value!=="openai");els.onnxFields.classList.toggle("hidden",els.taggerType.value!=="onnx");saveSettings();}
+function renderQueryType(){
+  const mode=els.queryType.value, isArtist=mode==="artist";
+  els.queryTypeHint.textContent=isArtist?"以 Danbooru 画师记录确认同名身份，自动带出 X、Pixiv 等关联主页。":"直接输入角色名或标签搜索 booru 站点；X/Pixiv 不支持此模式。";
+  els.searchArtistBtn.disabled=!isArtist;
+  els.artistQuery.placeholder=isArtist?"如 kantoku、Askzy 或 https://x.com/...":"如 hatsune_miku、touhou 或 1girl";
+  if(!isArtist){els.artistCandidates.classList.add("hidden");}
+  const userSources=["twitter","pixiv"];
+  els.sourceChecklist.querySelectorAll("[data-source-check]").forEach(box=>{
+    const id=box.dataset.sourceCheck;
+    if(userSources.includes(id)){
+      if(!isArtist&&box.checked){box.checked=false;selectedSourceIds.delete(id);const input=els.sourceChecklist.querySelector(`[data-source-map="${id}"]`);if(input)input.disabled=true;}
+      box.disabled=!isArtist;
+    }
+  });
+  saveSettings();
+}
 function applyLlmPromptPreset(){const prompt=LLM_PROMPT_PRESETS[els.llmPromptPreset.value];if(prompt!==undefined)els.llmPrompt.value=prompt;saveSettings();}
 function detectCustomLlmPrompt(){const match=Object.entries(LLM_PROMPT_PRESETS).find(([,prompt])=>prompt===els.llmPrompt.value);els.llmPromptPreset.value=match?match[0]:"custom";saveSettings();}
 function renderXCookieMode(){
@@ -117,7 +134,7 @@ function renderPixivCookieMode(){
 function collectDynamic(includeDisabled=false){const out={};document.querySelectorAll("[data-auth-field]").forEach(e=>{if(includeDisabled||!e.disabled)out[e.dataset.authField]=e.value.trim();});document.querySelectorAll("[data-extra-field]").forEach(e=>{if(includeDisabled||!e.disabled)out[e.dataset.extraField]=e.value;});return out;}
 function collectConfig(){
   stashCurrentSourceConfig();
-  const common={source:els.source.value,artist:els.sourceArtist.value.trim(),canonical_artist:els.canonicalArtist.value,canonical_artist_id:els.canonicalArtistId.value,count:parseInt(els.count.value,10)||0,tag_format:getTagFormat(),include_artist:els.includeArtist.checked,include_meta:els.includeMeta.checked,skip_video:els.skipVideo.checked,proxy:els.proxy.value.trim(),tagger_type:els.taggerType.value,tag_merge_mode:els.tagMergeMode.value,llm_base_url:els.llmBaseUrl.value.trim(),llm_api_key:els.llmApiKey.value.trim(),llm_model:els.llmModel.value.trim(),llm_prompt:els.llmPrompt.value.trim(),onnx_model_path:els.onnxModelPath.value.trim(),onnx_tags_path:els.onnxTagsPath.value.trim(),onnx_threshold:parseFloat(els.onnxThreshold.value)||0.35};
+  const common={source:els.source.value,artist:els.sourceArtist.value.trim(),query_type:els.queryType.value,canonical_artist:els.canonicalArtist.value,canonical_artist_id:els.canonicalArtistId.value,count:parseInt(els.count.value,10)||0,tag_format:getTagFormat(),include_artist:els.includeArtist.checked,include_meta:els.includeMeta.checked,skip_video:els.skipVideo.checked,proxy:els.proxy.value.trim(),tagger_type:els.taggerType.value,tag_merge_mode:els.tagMergeMode.value,llm_base_url:els.llmBaseUrl.value.trim(),llm_api_key:els.llmApiKey.value.trim(),llm_model:els.llmModel.value.trim(),llm_prompt:els.llmPrompt.value.trim(),onnx_model_path:els.onnxModelPath.value.trim(),onnx_tags_path:els.onnxTagsPath.value.trim(),onnx_threshold:parseFloat(els.onnxThreshold.value)||0.35};
   Object.assign(common,sourceConfigCache[els.source.value]||{},collectDynamic(),{rating:els.rating.value,x_cookie_mode:els.source.value==="twitter"?els.xCookieMode.value:"legacy",pixiv_cookie_mode:els.source.value==="pixiv"?els.pixivCookieMode.value:"legacy",x_handle:els.source.value==="twitter"?els.sourceArtist.value.trim():"",x_user_id:els.source.value==="twitter"?els.xUserId.value:""});
   const source_configs={};
   for(const id of selectedSourceIds){
@@ -274,6 +291,7 @@ els.source.addEventListener("change",()=>{stashCurrentSourceConfig();renderSourc
 els.sourceArtist.addEventListener("input",()=>{const input=sourceMapInput(els.source.value);if(input)input.value=els.sourceArtist.value;});
 els.xCookieMode.addEventListener("change",renderXCookieMode);els.pixivCookieMode.addEventListener("change",renderPixivCookieMode);
 els.taggerType.addEventListener("change",()=>{els.tagMergeMode.value=els.taggerType.value==="none"?"native_only":"tagger_only";renderTagger();});
+els.queryType.addEventListener("change",renderQueryType);
 els.tagMergeMode.addEventListener("change",saveSettings);els.llmPromptPreset.addEventListener("change",applyLlmPromptPreset);els.llmPrompt.addEventListener("input",detectCustomLlmPrompt);
 els.searchArtistBtn.addEventListener("click",searchArtists);els.artistQuery.addEventListener("keydown",e=>{if(e.key==="Enter")searchArtists();});
 els.openXSessionBtn.addEventListener("click",openXSession);els.checkXSessionBtn.addEventListener("click",checkXSession);els.openPixivSessionBtn.addEventListener("click",openPixivSession);els.checkPixivSessionBtn.addEventListener("click",checkPixivSession);els.openXBtn.addEventListener("click",openXPage);
