@@ -1102,6 +1102,7 @@ class Handler(BaseHTTPRequestHandler):
             if isinstance(cfg, str):
                 self.send_json({"ok": False, "error": cfg}, 400)
                 return
+            cfg["query_type"] = str(body.get("query_type") or "artist")
             try:
                 artists = source.search_artists(query, cfg, limit=12)
                 for artist in artists:

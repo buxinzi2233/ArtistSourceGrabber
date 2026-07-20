@@ -149,12 +149,12 @@ function collectConfig(){
 }
 
 async function searchArtists(){
-  const q=els.artistQuery.value.trim();if(!q){showError("请输入 Danbooru 画师名、别名或主页 URL");return;}
+  const q=els.artistQuery.value.trim();if(!q){showError(els.queryType.value==="artist"?"请输入 Danbooru 画师名、别名或主页 URL":"请输入角色名或标签名");return;}
   hideError();els.searchArtistBtn.disabled=true;els.artistCandidates.classList.remove("hidden");els.artistCandidates.innerHTML='<div class="candidate-empty">搜索中…</div>';
-  const cfg=collectConfig();let data;try{data=await postJSON("/api/artists/search",{...cfg,source:"danbooru",query:q,artist:q});}catch(_e){data={ok:false,error:"无法连接本地服务"};}
+  const cfg=collectConfig();let data;try{data=await postJSON("/api/artists/search",{...cfg,source:"danbooru",query:q,artist:q,query_type:cfg.query_type});}catch(_e){data={ok:false,error:"无法连接本地服务"};}
   els.searchArtistBtn.disabled=false;if(!data.ok){els.artistCandidates.innerHTML=`<div class="candidate-empty">${escapeHtml(data.error||"搜索失败")}</div>`;return;}
-  const list=data.artists||[];if(!list.length){els.artistCandidates.innerHTML='<div class="candidate-empty">没有候选，请尝试别名、X 主页 URL 或手动填写账号</div>';return;}
-  els.artistCandidates.innerHTML=list.map((a,i)=>`<button class="candidate" data-index="${i}" type="button"><span><b>${escapeHtml(a.name)}</b>${a.other_names?`<small>${escapeHtml(Array.isArray(a.other_names)?a.other_names.join(" · "):a.other_names)}</small>`:""}</span><span class="candidate-meta">${a.x_handles?.length?`X @${escapeHtml(a.x_handles[0])}`:"无 X 链接"}${a.score!=null?` · ${Math.round(a.score*100)}%`:""}</span></button>`).join("");
+  const list=data.artists||[];if(!list.length){els.artistCandidates.innerHTML=`<div class="candidate-empty">${els.queryType.value==="artist"?"没有候选，请尝试别名、X 主页 URL 或手动填写账号":"未找到匹配标签，可尝试部分名称或直接手动输入"}</div>`;return;}
+  els.artistCandidates.innerHTML=list.map((a,i)=>`<button class="candidate" data-index="${i}" type="button"><span><b>${escapeHtml(a.name)}</b>${a.other_names?`<small>${escapeHtml(Array.isArray(a.other_names)?a.other_names.join(" · "):a.other_names)}</small>`:""}</span><span class="candidate-meta">${a.x_handles?.length?`X @${escapeHtml(a.x_handles[0])}`:a.post_count!=null?`${a.post_count} 作品`:"无 X 链接"}${a.score!=null?` · ${Math.round(a.score*100)}%`:""}</span></button>`).join("");
   els.artistCandidates.querySelectorAll(".candidate").forEach(btn=>btn.addEventListener("click",()=>selectArtist(list[Number(btn.dataset.index)])));
 }
 function selectArtist(a){
